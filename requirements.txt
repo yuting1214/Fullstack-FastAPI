@@ -3,10 +3,12 @@ psycopg2-binary
 python-dotenv
 databases[asyncpg]
 databases[aiosqlite]
-fastapi<=0.111.0
+fastapi[standard]
 uvicorn
 sqlalchemy
 itsdangerous
 pytest
 pydantic>=2.7.0
 pydantic-settings
+httptools
+orjson

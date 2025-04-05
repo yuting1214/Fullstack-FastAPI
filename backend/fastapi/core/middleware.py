@@ -1,6 +1,7 @@
 from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse
 from backend.fastapi.core.init_settings import global_settings
 
@@ -34,5 +35,14 @@ async def doc_protect_middleware(request: Request, call_next):
     response = await call_next(request)
     return response
 
-def add_doc_protect(app):
+def setup_doc_protect(app):
     app.middleware("http")(doc_protect_middleware)
+
+def setup_gzip(app):
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+def setup_middleware(app):
+    setup_cors(app)
+    setup_doc_protect(app)
+    setup_session(app)
+    setup_gzip(app)
