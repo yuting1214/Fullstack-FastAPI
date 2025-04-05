@@ -12,3 +12,4 @@ pydantic>=2.7.0
 pydantic-settings
 httptools
 orjson
+locust
