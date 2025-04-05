@@ -10,3 +10,4 @@ itsdangerous
 pytest
 pydantic>=2.7.0
 pydantic-settings
+locust
