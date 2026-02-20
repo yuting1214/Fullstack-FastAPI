@@ -1,3 +1,4 @@
+from uuid import UUID
 from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,14 +22,14 @@ class MessageService:
         result = await self.db.execute(select(Message).offset(skip).limit(limit))
         return list(result.scalars().all())
 
-    async def get_message(self, message_id: str) -> Message:
-        result = await self.db.execute(select(Message).where(Message.id == str(message_id)))
+    async def get_message(self, message_id: UUID) -> Message:
+        result = await self.db.execute(select(Message).where(Message.id == message_id))
         db_message = result.scalar_one_or_none()
         if db_message is None:
             raise HTTPException(status_code=404, detail="Message not found")
         return db_message
 
-    async def update_message(self, message_id: str, message_data: MessageBase) -> Message:
+    async def update_message(self, message_id: UUID, message_data: MessageBase) -> Message:
         db_message = await self.get_message(message_id)
         for key, value in message_data.model_dump(exclude_unset=True).items():
             setattr(db_message, key, value)
@@ -36,7 +37,7 @@ class MessageService:
         await self.db.refresh(db_message)
         return db_message
 
-    async def delete_message(self, message_id: str) -> Message:
+    async def delete_message(self, message_id: UUID) -> Message:
         db_message = await self.get_message(message_id)
         await self.db.delete(db_message)
         await self.db.commit()
