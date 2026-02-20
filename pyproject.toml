@@ -1,0 +1,40 @@
+[project]
+name = "fullstack-fastapi"
+version = "0.1.0"
+description = "A fullstack FastAPI template with PostgreSQL"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]",
+    "uvicorn[standard]",
+    "sqlalchemy[asyncio]>=2.0",
+    "pydantic>=2.7.0",
+    "pydantic-settings",
+    "aiosqlite",
+    "asyncpg",
+    "psycopg2-binary",
+    "python-dotenv",
+    "itsdangerous",
+    "orjson",
+    "httptools",
+    "uvloop; sys_platform != 'win32'",
+    "anyio",
+    "ruff>=0.15.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "anyio[trio]",
+    "httpx",
+    "locust",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
