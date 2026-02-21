@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.0] - 2026-02-20
+## [0.1.0] - 2026-02-20
 
 ### Project Structure
 - **Reorganized to `src/` layout**: Moved from `backend/fastapi/` to `src/backend/`, `frontend/` to `src/frontend/`, and tests to root `tests/` directory. Eliminates redundant nesting and follows standard Python project conventions.
@@ -41,7 +41,7 @@ All notable changes to this project will be documented in this file.
 - **Updated Dockerfile**: Uses Python 3.12, installs dependencies via `uv` instead of `pip`, references new `src.backend.main` module path. Requires `[tool.hatch.build.targets.wheel] packages = ["src"]` in `pyproject.toml` so hatchling knows where to find the source packages in the `src/` layout.
 - **Updated locustfile**: Removed `/messages/async` endpoint tests (endpoint removed), cleaned up unused imports.
 
-## [0.1.0] - Previous
+## [0.0.1] - Previous
 
 ### Features (from `optimized-version` branch)
 - ORJSONResponse for fast JSON serialization
