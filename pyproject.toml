@@ -11,14 +11,12 @@ dependencies = [
     "pydantic-settings",
     "aiosqlite",
     "asyncpg",
-    "psycopg2-binary",
     "python-dotenv",
     "itsdangerous",
     "orjson",
     "httptools",
     "uvloop; sys_platform != 'win32'",
     "anyio",
-    "ruff>=0.15.2",
 ]
 
 [project.optional-dependencies]
@@ -27,6 +25,7 @@ dev = [
     "anyio[trio]",
     "httpx",
     "locust",
+    "ruff>=0.15.2",
 ]
 
 [tool.hatch.build.targets.wheel]
