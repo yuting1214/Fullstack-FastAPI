@@ -1,3 +1,5 @@
+import os
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -66,7 +68,10 @@ class ProdSettings(Settings):
     model_config = SettingsConfigDict(env_file=".env", extra="allow")
 
 
-def get_settings(env_mode: str = "dev") -> Settings:
-    if env_mode == "dev":
-        return DevSettings()
-    return ProdSettings()
+def get_settings() -> Settings:
+    if os.getenv("ENV_MODE", "dev") == "prod":
+        return ProdSettings()
+    return DevSettings()
+
+
+global_settings = get_settings()

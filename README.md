@@ -80,11 +80,11 @@ uv sync
 cp .env.example .env
 # Edit .env with your values
 
-# Run in development mode (SQLite)
-uv run python -m src.backend.main --mode dev
+# Run in development mode (SQLite, auto-reload)
+uv run python -m src.backend.main
 
 # Run in production mode (PostgreSQL)
-uv run python -m src.backend.main --mode prod --host 0.0.0.0
+ENV_MODE=prod HOST=0.0.0.0 uv run python -m src.backend.main
 ```
 
 ### Running Tests

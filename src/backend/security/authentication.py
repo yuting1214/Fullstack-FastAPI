@@ -1,4 +1,4 @@
-from src.backend.core.init_settings import global_settings
+from src.backend.core.config import global_settings
 
 
 def authenticate_user(username: str, password: str) -> bool:

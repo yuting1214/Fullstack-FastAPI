@@ -31,6 +31,9 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
 
+ENV ENV_MODE=prod
+ENV HOST=0.0.0.0
+
 # Exec the venv python directly: `uv run` would keep a ~25MB wrapper process
 # resident in the container, which counts toward billed memory.
-CMD ["/app/.venv/bin/python", "-m", "src.backend.main", "--mode", "prod", "--host", "0.0.0.0"]
+CMD ["/app/.venv/bin/python", "-m", "src.backend.main"]
