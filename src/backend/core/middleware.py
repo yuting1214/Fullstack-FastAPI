@@ -4,7 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.responses import RedirectResponse
 from starlette.requests import Request
-from src.backend.core.init_settings import global_settings
+from src.backend.core.config import global_settings
 
 
 class DocProtectMiddleware:

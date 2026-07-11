@@ -1,3 +1,7 @@
+import os
+import secrets
+
+from pydantic import Field, PrivateAttr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -7,7 +11,25 @@ class Settings(BaseSettings):
 
     USER_NAME: str = ""
     PASSWORD: str = ""
-    SECRET_KEY: str = "change-me-in-production"
+    # Auto-generated when unset so sessions work with zero config.
+    # Set it explicitly to keep sessions valid across restarts.
+    SECRET_KEY: str = Field(default_factory=lambda: secrets.token_urlsafe(32))
+
+    _docs_password_generated: bool = PrivateAttr(default=False)
+
+    def model_post_init(self, _context) -> None:
+        # Zero-config one-click deploys: when no docs credentials are set,
+        # generate them (printed once at startup) instead of the previous
+        # behavior where an empty login form would authenticate.
+        if not self.USER_NAME:
+            self.USER_NAME = "admin"
+        if not self.PASSWORD:
+            self.PASSWORD = secrets.token_urlsafe(12)
+            self._docs_password_generated = True
+
+    @property
+    def docs_password_generated(self) -> bool:
+        return self._docs_password_generated
 
     @property
     def DB_URL(self) -> str:
@@ -66,7 +88,10 @@ class ProdSettings(Settings):
     model_config = SettingsConfigDict(env_file=".env", extra="allow")
 
 
-def get_settings(env_mode: str = "dev") -> Settings:
-    if env_mode == "dev":
-        return DevSettings()
-    return ProdSettings()
+def get_settings() -> Settings:
+    if os.getenv("ENV_MODE", "dev") == "prod":
+        return ProdSettings()
+    return DevSettings()
+
+
+global_settings = get_settings()

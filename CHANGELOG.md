@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2026-07-11
+
+### Memory & Deployment (Railway bills by memory)
+- **Idle container memory ~62MB, down from ~150MB** (measured via cgroup against PostgreSQL): the container now execs the venv Python directly instead of keeping a `uv run` wrapper process resident, caps glibc malloc arenas (`MALLOC_ARENA_MAX=2`, `MALLOC_TRIM_THRESHOLD_=100000`), and precompiles bytecode at build time (`UV_COMPILE_BYTECODE=1`).
+- **Genuinely multi-stage Dockerfile**: the final image contains only the venv and `src/` — no uv binary, no build context.
+- **Added `.dockerignore`**: host `.venv`, `.git`, `dev.db`, tests, and caches no longer enter the build context.
+
+### FastAPI 0.139 Upgrade
+- **Upgraded FastAPI 0.129 → 0.139**: JSON responses now serialize through pydantic-core (Rust); removed the deprecated `ORJSONResponse` and the `orjson` dependency.
+- **Replaced `fastapi[standard]` with explicit deps** (`fastapi`, `jinja2`, `python-multipart`): fastapi-cli, httpx, and email-validator were never imported at runtime.
+- Note: FastAPI 0.132+ rejects JSON requests with an incorrect `Content-Type` by default.
+
+### Database
+- **UUIDv7 primary keys**: time-ordered IDs (via `uuid-utils`) replace random uuid4 for B-tree insert locality; PostgreSQL 18's native `uuidv7()` server default is documented as an alternative.
+- **Alembic async migrations**: `migrations/` scaffolding with `env.py` wired to app settings; initial revision included. Startup `create_all` is kept so one-click deploys stay zero-step.
+- **Removed unused `psycopg2-binary`**; the data layer is asyncpg-only.
+
+### Configuration
+- **Env-var-driven settings** (`ENV_MODE`, `HOST`, `PORT`) replace module-level argparse — the app now also runs under plain `uvicorn src.backend.main:app` and gunicorn.
+
+### API
+- **Added `GET /health`** liveness endpoint for Railway healthchecks.
+
+### Security
+- **Docs credentials always required**: `USER_NAME`/`PASSWORD` are prompted during Railway onboarding; if left unset, they are auto-generated and printed once in the startup logs. Previously, unset credentials meant an empty login form authenticated successfully.
+- **Constant-time credential comparison** (`secrets.compare_digest`) prevents timing-based probing.
+- **`SECRET_KEY` auto-generates** when unset (set a stable value to keep sessions across restarts).
+
+### Login UI
+- **Redesigned the auth page**: modern card layout with dark-mode support (`prefers-color-scheme`), accessible focus states, and reduced-motion fallbacks — replacing the legacy fake-modal design.
+- **htmx-enhanced login** (vendored `htmx.min.js` 2.0.10, no CDN): failed logins swap only the card fragment; successful logins redirect via `HX-Redirect`. Plain form POST still works without JavaScript.
+
+### Housekeeping
+- Moved `ruff` to the dev dependency group; refreshed all locked dependencies.
+
 ## [0.1.0] - 2026-02-20
 
 ### Project Structure
