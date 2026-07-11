@@ -23,18 +23,21 @@ A production-ready [FastAPI](https://fastapi.tiangolo.com/) template with [Postg
 
 ## Features
 
-- **FastAPI** with ORJSONResponse for fast serialization
+- **FastAPI 0.139+** — JSON serialized natively by pydantic-core (Rust)
 - **Fully async** — endpoints, CRUD, and database layer
 - **SQLAlchemy 2.0** with async engine and `select()` style queries
+- **UUIDv7 primary keys** — time-ordered for B-tree locality (native in PostgreSQL 18)
+- **Alembic** async migrations included
 - **Pydantic v2** for request/response validation and settings management
 - **Pure ASGI middleware** for doc protection (no `BaseHTTPMiddleware` overhead)
 - **Typed lifespan state** with proper startup/shutdown lifecycle
 - **uvloop + httptools** for maximum ASGI performance
 - **GZIP compression** for responses > 1KB
 - **Session-based auth** protecting `/docs` and `/redoc`
+- **`/health` endpoint** for platform healthchecks
 - **uv** for fast, reproducible dependency management
 - **Locust** load testing included
-- **Docker** multi-stage build ready
+- **Memory-tuned Docker image** — multi-stage build, ~62MB idle (Railway bills by memory)
 
 ## Project Structure
 
@@ -52,7 +55,9 @@ A production-ready [FastAPI](https://fastapi.tiangolo.com/) template with [Postg
 │   │   └── data/                # Seed data
 │   └── frontend/
 │       └── login/               # Login page templates & static files
+├── migrations/                  # Alembic async migrations
 ├── tests/                       # Async test suite
+├── alembic.ini                  # Alembic config (URL comes from app settings)
 ├── pyproject.toml               # Dependencies & project config
 ├── Dockerfile                   # Multi-stage build with uv
 ├── locustfile.py                # Load testing
@@ -87,6 +92,17 @@ uv run python -m src.backend.main
 ENV_MODE=prod HOST=0.0.0.0 uv run python -m src.backend.main
 ```
 
+### Database Migrations
+
+Tables are auto-created on startup, so the one-click deploy needs no manual step.
+For controlled schema evolution, use Alembic (the URL is resolved from the same
+`ENV_MODE` / `DATABASE_URL` settings the app uses):
+
+```bash
+uv run alembic upgrade head                          # apply migrations
+uv run alembic revision --autogenerate -m "change"   # generate a new migration
+```
+
 ### Running Tests
 
 ```bash
@@ -114,7 +130,8 @@ docker run -p 5000:5000 fullstack-fastapi
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/` | Health check |
+| `GET` | `/` | Onboarding message |
+| `GET` | `/health` | Liveness probe (healthchecks) |
 | `GET` | `/login` | Login page |
 | `POST` | `/login` | Authenticate |
 | `GET` | `/logout` | Clear session |
@@ -127,6 +144,31 @@ docker run -p 5000:5000 fullstack-fastapi
 ## Environment Variables
 
 See [`.env.example`](./.env.example) for all available configuration options.
+
+Runtime behavior is controlled by env vars (no CLI flags), so the app also runs
+under plain `uvicorn src.backend.main:app`:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `ENV_MODE` | `dev` | `dev` = SQLite + auto-reload, `prod` = PostgreSQL |
+| `HOST` | `127.0.0.1` | Bind address (`0.0.0.0` in the Docker image) |
+| `PORT` | `5000` | Listen port (set automatically by Railway) |
+| `DATABASE_URL` | — | PostgreSQL URL in prod (injected by Railway) |
+
+## Memory Footprint
+
+Railway bills by memory per minute, so the image is tuned for a low idle
+footprint — **~62MB idle** (measured via cgroup in Docker), down from ~150MB:
+
+- The container execs the venv Python directly — no resident `uv run` wrapper process
+- `MALLOC_ARENA_MAX=2` + `MALLOC_TRIM_THRESHOLD_` cap glibc arena bloat
+- Bytecode is precompiled at build time (`UV_COMPILE_BYTECODE=1`) for faster, leaner cold starts
+- Multi-stage build ships only the venv and `src/` — no build tools in the final image
+
+**Tip:** if your traffic is bursty, enable Railway's
+[App Sleeping](https://docs.railway.com/reference/app-sleeping) on the service —
+compute cost drops to ~$0 while idle, and this template's single-process design
+is compatible with it.
 
 ## Learn More
 
