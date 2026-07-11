@@ -1,0 +1,42 @@
+# Virtual environments (host venv must never enter the image)
+.venv
+venv/
+
+# Git
+.git
+.gitignore
+
+# Local databases
+*.db
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Env files (secrets come from the platform, not the image)
+.env
+.env.*
+!.env.example
+
+# Tests, docs, and tooling not needed at runtime
+tests/
+docs/
+locustfile.py
+.claude/
+.idea/
+.vscode/
+.cursor/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project meta
+LICENSE
+*.md
+zeabur_fastapi.yaml
+Dockerfile
+.dockerignore
