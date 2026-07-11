@@ -47,3 +47,30 @@ async def test_login_accepts_configured_credentials(async_client):
     )
     assert response.status_code == status.HTTP_303_SEE_OTHER
     assert response.headers["location"] == "/docs"
+
+
+@pytest.mark.anyio
+async def test_htmx_login_success_sends_client_redirect(async_client):
+    response = await async_client.post(
+        "/login",
+        data={
+            "username": global_settings.USER_NAME,
+            "password": global_settings.PASSWORD,
+        },
+        headers={"HX-Request": "true"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.headers["hx-redirect"] == "/docs"
+
+
+@pytest.mark.anyio
+async def test_htmx_login_failure_swaps_card_fragment(async_client):
+    response = await async_client.post(
+        "/login",
+        data={"username": "nobody", "password": "wrong-password"},
+        headers={"HX-Request": "true"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert "Invalid credentials" in response.text
+    assert 'id="login-card"' in response.text
+    assert "<html" not in response.text  # fragment, not the full page

@@ -30,6 +30,10 @@ All notable changes to this project will be documented in this file.
 - **Constant-time credential comparison** (`secrets.compare_digest`) prevents timing-based probing.
 - **`SECRET_KEY` auto-generates** when unset (set a stable value to keep sessions across restarts).
 
+### Login UI
+- **Redesigned the auth page**: modern card layout with dark-mode support (`prefers-color-scheme`), accessible focus states, and reduced-motion fallbacks — replacing the legacy fake-modal design.
+- **htmx-enhanced login** (vendored `htmx.min.js` 2.0.10, no CDN): failed logins swap only the card fragment; successful logins redirect via `HX-Redirect`. Plain form POST still works without JavaScript.
+
 ### Housekeeping
 - Moved `ruff` to the dev dependency group; refreshed all locked dependencies.
 

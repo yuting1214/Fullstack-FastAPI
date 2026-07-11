@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FastAPI Login Modal</title>
+    <title>{% block title %}Sign in · API Docs{% endblock %}</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="icon" href="/static/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/static/favicon.ico" sizes="32x32">
+    <script src="/static/htmx.min.js" defer></script>
 </head>
 <body>
     {% block content %}{% endblock %}
