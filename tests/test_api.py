@@ -6,6 +6,13 @@ invalid_message_data = {"invalid_field": "This should fail"}
 
 
 @pytest.mark.anyio
+async def test_health(async_client):
+    response = await async_client.get("/health")
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"status": "ok"}
+
+
+@pytest.mark.anyio
 async def test_create_message(async_client):
     response = await async_client.post("/api/v1/messages/", json=valid_message_data)
     assert response.status_code == status.HTTP_201_CREATED
