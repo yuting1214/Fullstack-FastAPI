@@ -25,6 +25,11 @@ All notable changes to this project will be documented in this file.
 ### API
 - **Added `GET /health`** liveness endpoint for Railway healthchecks.
 
+### Security
+- **Docs credentials always required**: `USER_NAME`/`PASSWORD` are prompted during Railway onboarding; if left unset, they are auto-generated and printed once in the startup logs. Previously, unset credentials meant an empty login form authenticated successfully.
+- **Constant-time credential comparison** (`secrets.compare_digest`) prevents timing-based probing.
+- **`SECRET_KEY` auto-generates** when unset (set a stable value to keep sessions across restarts).
+
 ### Housekeeping
 - Moved `ruff` to the dev dependency group; refreshed all locked dependencies.
 

@@ -154,6 +154,8 @@ under plain `uvicorn src.backend.main:app`:
 | `HOST` | `127.0.0.1` | Bind address (`0.0.0.0` in the Docker image) |
 | `PORT` | `5000` | Listen port (set automatically by Railway) |
 | `DATABASE_URL` | — | PostgreSQL URL in prod (injected by Railway) |
+| `USER_NAME` / `PASSWORD` | auto-generated | API docs login — prompted during Railway onboarding; if left empty, generated and printed once in the startup logs |
+| `SECRET_KEY` | auto-generated | Session signing key — set a stable value to keep sessions across restarts |
 
 ## Memory Footprint
 
