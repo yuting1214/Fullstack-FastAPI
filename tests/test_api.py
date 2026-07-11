@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import pytest
 from fastapi import status
 
@@ -25,6 +27,17 @@ async def test_create_message(async_client):
 async def test_create_message_invalid_data(async_client):
     response = await async_client.post("/api/v1/messages/", json=invalid_message_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+@pytest.mark.anyio
+async def test_message_ids_are_time_ordered_uuid7(async_client):
+    first = await async_client.post("/api/v1/messages/", json=valid_message_data)
+    second = await async_client.post("/api/v1/messages/", json=valid_message_data)
+    first_id = UUID(first.json()["id"])
+    second_id = UUID(second.json()["id"])
+    assert first_id.version == 7
+    assert second_id.version == 7
+    assert first_id < second_id
 
 
 @pytest.mark.anyio
