@@ -19,6 +19,7 @@ dependencies = [
     "uvloop; sys_platform != 'win32'",
     "anyio",
     "uuid-utils>=0.17.0",
+    "alembic>=1.18.5",
 ]
 
 [project.optional-dependencies]
