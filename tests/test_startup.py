@@ -1,9 +1,18 @@
 from unittest.mock import AsyncMock
 
 import pytest
+from fastapi import FastAPI
+from sqlalchemy import func, select
 from sqlalchemy.exc import ProgrammingError
 
 from src.backend.core import lifespan as startup
+from src.backend.dependencies.database import AsyncSessionLocal
+from src.backend.models import Message
+
+
+async def count_messages() -> int:
+    async with AsyncSessionLocal() as db:
+        return await db.scalar(select(func.count()).select_from(Message))
 
 
 @pytest.mark.anyio
@@ -50,3 +59,13 @@ async def test_retry_log_omits_connection_details(monkeypatch, caplog):
     await startup.init_db_with_retry()
     assert "Database not reachable yet" in caplog.text
     assert "secret" not in caplog.text
+
+
+@pytest.mark.anyio
+async def test_seed_runs_once_across_restarts():
+    async with startup.lifespan(FastAPI()):
+        pass
+    async with startup.lifespan(FastAPI()):
+        pass
+
+    assert await count_messages() == len(startup.models_data)
