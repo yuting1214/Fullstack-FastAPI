@@ -2,13 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.2.1] - 2026-11-07
 
 ### Deployment reliability
 - **Railway healthcheck declared**: `railway.json` declares `/health` as the deploy healthcheck (120s) with an `ON_FAILURE` restart policy (10 retries). In November 2026 tests Railway did not apply the file's healthcheck, so it must also be set in the service settings (for the template: its service config).
 - **Startup waits for the database**: connection errors are retried every 2s for up to 60s instead of exiting on the first refused connection; other errors still fail fast, and retry logs never include the database URL.
 - **Sample data is seeded once**: the two demo messages are inserted only into an empty table, not on every restart.
 - **`postgres://` URLs accepted** (normalized to `postgresql+asyncpg://`), and `ENV_MODE=prod` without database settings now fails with a clear message.
+
+### Railway template (published `FastAPI - PostgreSQL`, applied in the template editor)
+- **PostgreSQL 18**: the template's database image moves from `postgres-ssl:latest` (which resolved to PostgreSQL 16) to `postgres-ssl:18`. Applies to new deploys only; existing databases are not migrated.
+- **Healthcheck path `/health`** set on the app service, so a deploy only goes live once startup (database connection, tables, seed) has finished.
 
 ## [0.2.0] - 2026-07-11
 
