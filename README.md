@@ -97,8 +97,10 @@ ENV_MODE=prod HOST=0.0.0.0 uv run python -m src.backend.main
 Tables are auto-created on startup, so the one-click deploy needs no manual step.
 On startup the app waits up to 60 seconds for the database to accept connections
 (it boots alongside the app on a one-click deploy), then creates tables and seeds two
-sample messages only if the table is empty. `railway.json` sets `/health` as the deploy
-healthcheck (120s timeout) and restarts the service on failure up to 10 times.
+sample messages only if the table is empty. Set the service's healthcheck path to
+`/health` (Service → Settings → Healthcheck Path) so a deploy only goes live once startup
+has finished. `railway.json` declares the same healthcheck, but in our November 2026 tests
+Railway did not apply it from the file, so set it in the service settings too.
 For controlled schema evolution, use Alembic (the URL is resolved from the same
 `ENV_MODE` / `DATABASE_URL` settings the app uses):
 
