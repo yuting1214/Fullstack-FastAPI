@@ -51,8 +51,22 @@ class Settings(BaseSettings):
         if self.ENV_MODE == "dev":
             return "sqlite+aiosqlite:///./dev.db"
         if self.DATABASE_URL:
+            if "://" not in self.DATABASE_URL:
+                raise ValueError(
+                    "DATABASE_URL must look like postgresql://user:pass@host:port/db"
+                )
             scheme, rest = self.DATABASE_URL.split("://", 1)
+            # Heroku-style providers emit postgres://, which SQLAlchemy rejects;
+            # drop any driver suffix (postgresql+psycopg) and force asyncpg.
+            scheme = scheme.split("+", 1)[0]
+            if scheme == "postgres":
+                scheme = "postgresql"
             return f"{scheme}+asyncpg://{rest}"
+        if not self.DB_HOST:
+            raise ValueError(
+                "ENV_MODE=prod needs a database: set DATABASE_URL"
+                " (on Railway: ${{Postgres.DATABASE_URL}}) or the DB_* variables"
+            )
         return "{}+asyncpg://{}:{}@{}:{}/{}".format(
             self.DB_ENGINE,
             self.DB_USERNAME,
