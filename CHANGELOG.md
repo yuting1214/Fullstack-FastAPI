@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Deployment reliability
+- **Railway healthcheck configured**: `railway.json` sets `/health` as the deploy healthcheck (120s) with an `ON_FAILURE` restart policy (10 retries). Previously `/health` existed but Railway never used it.
+- **Startup waits for the database**: connection errors are retried every 2s for up to 60s instead of exiting on the first refused connection; other errors still fail fast, and retry logs never include the database URL.
+- **Sample data is seeded once**: the two demo messages are inserted only into an empty table, not on every restart.
+- **`postgres://` URLs accepted** (normalized to `postgresql+asyncpg://`), and `ENV_MODE=prod` without database settings now fails with a clear message.
+
 ## [0.2.0] - 2026-07-11
 
 ### Memory & Deployment (Railway bills by memory)
