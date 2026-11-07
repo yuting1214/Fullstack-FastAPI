@@ -95,6 +95,10 @@ ENV_MODE=prod HOST=0.0.0.0 uv run python -m src.backend.main
 ### Database Migrations
 
 Tables are auto-created on startup, so the one-click deploy needs no manual step.
+On startup the app waits up to 60 seconds for the database to accept connections
+(it boots alongside the app on a one-click deploy), then creates tables and seeds two
+sample messages only if the table is empty. `railway.json` sets `/health` as the deploy
+healthcheck (120s timeout) and restarts the service on failure up to 10 times.
 For controlled schema evolution, use Alembic (the URL is resolved from the same
 `ENV_MODE` / `DATABASE_URL` settings the app uses):
 
