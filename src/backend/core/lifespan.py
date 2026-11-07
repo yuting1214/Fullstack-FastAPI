@@ -6,6 +6,7 @@ from typing import TypedDict
 import anyio
 from asyncpg.exceptions import CannotConnectNowError
 from fastapi import FastAPI
+from sqlalchemy import select
 from sqlalchemy.exc import InterfaceError, OperationalError
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
@@ -13,6 +14,7 @@ from src.backend.core.config import global_settings
 from src.backend.dependencies.database import async_engine, AsyncSessionLocal, init_db
 from src.backend.crud.message import create_message_dict_async
 from src.backend.data.init_data import models_data
+from src.backend.models import Message
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -45,6 +47,15 @@ async def init_db_with_retry() -> None:
         )
 
 
+async def seed_if_empty() -> None:
+    # Seed once: restarts and redeploys must not add the sample rows again.
+    async with AsyncSessionLocal() as db:
+        if await db.scalar(select(Message.id).limit(1)) is not None:
+            return
+        for raw_data in models_data:
+            await create_message_dict_async(db, raw_data)
+
+
 class AppState(TypedDict):
     db_session_factory: async_sessionmaker
 
@@ -69,11 +80,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[AppState]:
     try:
         # Initialize database tables, waiting for a database that is still booting
         await init_db_with_retry()
-
-        # Seed initial data
-        async with AsyncSessionLocal() as db:
-            for raw_data in models_data:
-                await create_message_dict_async(db, raw_data)
+        await seed_if_empty()
 
         yield {"db_session_factory": AsyncSessionLocal}
     finally:
